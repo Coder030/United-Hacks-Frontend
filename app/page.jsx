@@ -3,8 +3,31 @@
 import Image from "next/image";
 import img1 from "../public/dummyimage.png";
 import BlurText from "./Components/BlurText";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const router = useRouter()
+  const [currentName, setCurrentName] = useState('')
+  const [currentId, setCurrentId] = useState('')
+  useEffect(() => {
+    const fetchData = async () => {
+      const response2 = await fetch('http://localhost:2000/api/me/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data3 = await response2.json()
+      if (data3['message'] === 'nvt') {
+        router.push('/login')
+      }
+      else{
+        setCurrentId(data3['data']['id'])
+        setCurrentName(data3['data']['username'])
+      }
+    }
+    fetchData()
+  }, [router])
   return (
     <div>
       <div className="flex flex-col lg:flex-row w-full">
@@ -25,7 +48,7 @@ export default function Home() {
             className="ml-[10px]"
           />
           <BlurText
-            text="Project !!"
+            text="Project!!"
             delay={150}
             animateBy="words"
             direction="top"

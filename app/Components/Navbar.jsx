@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { createTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import { purple } from "@mui/material/colors";
+import { purple } from "@mui/material/colors"
 import { styled } from "@mui/material/styles";
 
 const theme = createTheme({
@@ -28,14 +28,45 @@ const ColorButton = styled(Button)(({ theme }) => ({
 
 
 export default function Navbar() {
-  const router = useRouter();
+   const router = useRouter()
+    const [currentName, setCurrentName] = useState('')
+    const [currentId, setCurrentId] = useState('')
+    const [flag, setFlag] = useState(false)
+    useEffect(() => {
+      const fetchData = async () => {
+        const response2 = await fetch('http://localhost:2000/api/me/', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        const data3 = await response2.json()
+        console.log(data3)
+        if (data3['message'] === 'nvt') {
+          router.push('/login')
+          setFlag(false);
+        }
+        else{
+          setFlag(true)
+          setCurrentId(data3['data']['id'])
+          setCurrentName(data3['data']['username'])
+        }
+      }
+      fetchData()
+    })
+    // useEffect(() => {
+
+    // })
   const pathname = usePathname();
   const [hoverIndicator, setHoverIndicator] = useState(false);
   const [hoverIndicatorPosition, setHoverIndicatorPosition] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  if (pathname === "/login" || pathname === "/signup") {
+    return null; // Do not render the Navbar for these paths
+  }
+
   const links = [
-    { target: "/", label: "Page 1", active: pathname === "/" },
+    { target: "/", label: "Home", active: pathname === "/" },
     { target: "/page2", label: "Page 2", active: pathname === "/page2" },
     { target: "/page3", label: "Page 3", active: pathname === "/page3" },
     { target: "/page4", label: "Page 4", active: pathname === "/page4" },
@@ -98,10 +129,19 @@ export default function Navbar() {
         <button className="bg-blue-500 font-semibold text-[18px] cursor-pointer transition-all duration-200 px-4 py-2 rounded text-[#fff] hover:bg-blue-600 hover:shadow-lg">
         SIGN UP
         </button> */}
+        {!flag &&
         <Stack direction="row" spacing={2}>
-          <Button variant="text" size="large">LOG IN</Button>
-          <Button variant="contained" size="large">SIGN UP</Button>
-        </Stack>
+        <Link href="/login"><Button variant="text" size="large">LOG IN</Button></Link>
+        <Button variant="contained" size="large">SIGN UP</Button>
+      </Stack>}
+        {flag && 
+        <div className="flex items-center">
+        <button className="flex justify-center items-center text-[25px] mr-[10px] bg-blue-500 py-[10px] px-[10px] rounded-[100%] h-[50px] w-[50px] text-white">
+          {currentName.charAt(0)}
+        </button>
+        <p className="text-[25px]">{currentName}</p>
+      </div>
+        }
       </div>
 
       {/* Mobile Menu Button */}
@@ -159,10 +199,10 @@ export default function Navbar() {
               />
             </a>
           ))}
-          <Stack direction="column" spacing={2}>
-          <Button variant="text" size="large">LOG IN</Button>
-          <Button variant="contained" size="large">SIGN UP</Button>
-        </Stack>
+        <Stack direction="column" spacing={2}>
+        <Button variant="text" size="large"><Link href="/login">LOG IN</Link></Button>
+        <Button variant="contained" size="large">SIGN UP</Button>
+        </Stack>  
         </div>
       )}
     </div>
