@@ -4,6 +4,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import { createTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import { purple } from "@mui/material/colors";
+import { styled } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    bluey: '#2196F3',
+  },
+});
+
+const ColorButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.getContrastText(purple[500]),
+  backgroundColor: purple[500],
+  '&:hover': {
+    backgroundColor: purple[700],
+  },
+}));
+
+
 
 export default function Navbar() {
   const router = useRouter();
@@ -45,16 +67,16 @@ export default function Navbar() {
               setHoverIndicatorPosition(0);
             }}
           >
-            <div
-              className={`font-semibold text-[18px] cursor-pointer transition-all duration-200 ${
-                link.active ||
-                (hoverIndicator && hoverIndicatorPosition === i)
-                  ? "text-[#4a4a4a]" // Active color
-                  : "text-[#9e9e9e]"
-              }`}
-            >
-              {link.label}
-            </div>
+<div
+  className={`font-semibold text-[13.2px] md:text-[18px] cursor-pointer transition-all duration-200 ${
+    link.active ||
+    (hoverIndicator && hoverIndicatorPosition === i)
+      ? "text-[#4a4a4a]" // Active color
+      : "text-[#9e9e9e]"
+  }`}
+>
+  {link.label}
+</div>
 
             <div
               className={`transform transition-all duration-400 h-[8px] relative top-[-6px] w-[calc(100%+10px)] ml-[-5px] origin-bottom ${
@@ -69,13 +91,17 @@ export default function Navbar() {
       </div>
 
       {/* Desktop Buttons */}
-      <div className="hidden sm:flex gap-[10px] ml-auto">
-        <button className="bg-blue-500 font-semibold text-[18px] cursor-pointer transition-all duration-200 px-4 py-2 rounded text-[#fff] hover:bg-blue-600 hover:shadow-lg">
-          Sign Up
+      <div className="hidden sm:flex gap-[10px] ml-auto mr-[2.5%]">
+        {/* <button className="font-semibold text-[18px] cursor-pointer transition-all duration-200 px-4 py-2 rounded text-blue-500 hover:bg-[#f2f8ff] hover:shadow-lg">
+        LOG IN
         </button>
         <button className="bg-blue-500 font-semibold text-[18px] cursor-pointer transition-all duration-200 px-4 py-2 rounded text-[#fff] hover:bg-blue-600 hover:shadow-lg">
-          Sign In
-        </button>
+        SIGN UP
+        </button> */}
+        <Stack direction="row" spacing={2}>
+          <Button variant="text" size="large">LOG IN</Button>
+          <Button variant="contained" size="large">SIGN UP</Button>
+        </Stack>
       </div>
 
       {/* Mobile Menu Button */}
@@ -133,12 +159,10 @@ export default function Navbar() {
               />
             </a>
           ))}
-          <button className="bg-blue-500 text-white px-4 py-2 rounded mb-[10px] hover:bg-blue-600 hover:shadow-lg">
-            Sign Up
-          </button>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded mb-[10px] hover:bg-blue-600 hover:shadow-lg">
-            Sign In
-          </button>
+          <Stack direction="column" spacing={2}>
+          <Button variant="text" size="large">LOG IN</Button>
+          <Button variant="contained" size="large">SIGN UP</Button>
+        </Stack>
         </div>
       )}
     </div>
