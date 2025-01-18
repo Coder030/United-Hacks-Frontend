@@ -11,6 +11,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"; // Import Firebase 
 import { app } from "../firebase"; // Ensure this points to your Firebase config file
 import { styled } from "@mui/material/styles";
 import { purple } from "@mui/material/colors";
+import { FiMenu, FiX } from "react-icons/fi"; // For burger icon
 
 const theme = createTheme({
   palette: {
@@ -31,6 +32,7 @@ export default function Navbar() {
   const [currentName, setCurrentName] = useState("");
   const [currentId, setCurrentId] = useState("");
   const [flag, setFlag] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // State for burger menu
   const pathname = usePathname();
 
   useEffect(() => {
@@ -40,7 +42,6 @@ export default function Navbar() {
         // User is signed in
         setFlag(true);
         setCurrentId(user.uid);
-        console.log(user)
         setCurrentName(user.displayName || user.email.split("@")[0]); // Use display name or email prefix
       } else {
         // User is signed out
@@ -68,6 +69,10 @@ export default function Navbar() {
     { target: "/page4", label: "Page 4", active: pathname === "/page4" },
   ];
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <div className="flex items-center gap-[0px] w-full p-[30px] pl-[50px] border-b">
       {/* Logo */}
@@ -94,6 +99,55 @@ export default function Navbar() {
         ))}
       </div>
 
+      {/* Mobile Burger Menu */}
+      <div className="sm:hidden ml-auto">
+        <button onClick={toggleMenu} className="text-[30px]">
+          {menuOpen ? <FiX /> : <FiMenu />}
+        </button>
+      </div>
+
+      {/* Mobile Menu Links */}
+      {menuOpen && (
+        <div className="">
+          <div className="absolute top-[80px] left-0 w-full bg-white shadow-lg z-50 flex flex-col items-center p-[20px]">
+    {links.map((link, i) => (
+      <a
+        href={link.target}
+        key={i}
+        className={`font-semibold text-[18px] py-2 px-4 ${
+          link.active ? "text-blue-500" : "text-gray-700"
+        }`}
+        onClick={() => setMenuOpen(false)} // Close menu on link click
+      >
+        {link.label}
+      </a>
+    ))}
+  </div>
+          {!flag && (
+            <div className="flex flex-col mt-4 gap-2 w-full">
+              <Link href="/login">
+                <Button variant="text" size="large" fullWidth>
+                  LOG IN
+                </Button>
+              </Link>
+              <Button variant="contained" size="large" fullWidth>
+                SIGN UP
+              </Button>
+            </div>
+          )}
+          {/* {flag && (
+            <div className="flex flex-col items-start mt-4">
+              <div className="flex items-center gap-2">
+                <button className="flex justify-center items-center bg-blue-500 rounded-full h-[50px] w-[50px] text-white text-[22px]">
+                  {currentName.charAt(0).toUpperCase()}
+                </button>
+                <p className="text-[25px]">{currentName}</p>
+              </div>
+            </div>
+          )} */}
+        </div>
+      )}
+
       {/* Desktop Buttons */}
       <div className="hidden sm:flex gap-[10px] ml-auto mr-[2.5%]">
         {!flag && (
@@ -110,10 +164,9 @@ export default function Navbar() {
         )}
         {flag && (
           <div className="flex items-center">
-                       <button
-  className="flex justify-center items-center bg-blue-500 rounded-full h-[50px] w-[50px] text-white text-[22px] mr-[10px]"
->{currentName.charAt(0).toUpperCase()}
-</button>
+            <button className="flex justify-center items-center bg-blue-500 rounded-full h-[50px] w-[50px] text-white text-[22px] mr-[10px]">
+              {currentName.charAt(0).toUpperCase()}
+            </button>
             <p className="text-[25px]">{currentName}</p>
           </div>
         )}
