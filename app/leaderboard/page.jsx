@@ -37,9 +37,9 @@ function Leaderboard() {
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-
+  
     const filteredDistricts = fetchedDistricts.filter((district) =>
-      district.district.toLowerCase().startsWith(query.toLowerCase())
+      district.district.toLowerCase().includes(query.toLowerCase()) // Changed from startsWith to includes
     );
     setDistricts(filteredDistricts);
   };
