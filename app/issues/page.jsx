@@ -13,6 +13,15 @@ const IssuesPage = () => {
   const [data, setData] = useState([]);
   const [load, setLoad] = useState(true);
 
+  const [userLocation, setUserLocation] = useState({ lat: null, long: null });
+  const [filter, setFilter] = useState({
+    tag: "all",
+    madeByYou: false,
+    category: "all", // New filter for categories
+  });
+  const [filteredIssues, setFilteredIssues] = useState([]);
+
+  // Fetch user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -25,6 +34,7 @@ const IssuesPage = () => {
     });
   }, [userId]);
 
+  // Fetch issues data from Firebase
   useEffect(() => {
     const d = ref(database, "posts");
     onValue(d, (snapshot) => {
@@ -40,6 +50,7 @@ const IssuesPage = () => {
           madeBy: rawData[key].userUID,
           madeByName: rawData[key].userName,
           title: rawData[key].title,
+          issue: rawData[key].issue, // The category of the issue
         }));
         setData(transformedData);
       }
@@ -47,10 +58,7 @@ const IssuesPage = () => {
     });
   }, []);
 
-  const [userLocation, setUserLocation] = useState({ lat: null, long: null });
-  const [filter, setFilter] = useState({ tag: "all", madeByYou: false });
-  const [filteredIssues, setFilteredIssues] = useState([]);
-
+  // Fetch user location
   useEffect(() => {
     const fetchUserLocation = () => {
       if (navigator.geolocation) {
@@ -60,7 +68,6 @@ const IssuesPage = () => {
               lat: position.coords.latitude,
               long: position.coords.longitude,
             });
-            console.log(userLocation)
           },
           (error) => {
             console.error("Error fetching location:", error.message);
@@ -74,6 +81,7 @@ const IssuesPage = () => {
     fetchUserLocation();
   });
 
+  // Apply filters
   useEffect(() => {
     const applyFilters = () => {
       if (userLocation.lat === null || userLocation.long === null) return;
@@ -93,7 +101,10 @@ const IssuesPage = () => {
         const matchesMadeByYou =
           !filter.madeByYou || issue.madeBy === userId;
 
-        return isWithinRadius && matchesTag && matchesMadeByYou;
+        const matchesCategory =
+          filter.category === "all" || issue.issue === filter.category;
+
+        return isWithinRadius && matchesTag && matchesMadeByYou && matchesCategory;
       });
 
       setFilteredIssues(filtered);
@@ -109,7 +120,7 @@ const IssuesPage = () => {
         issue.id === id ? { ...issue, pending: false } : issue
       )
     );
-  
+
     // Update the issue in the Firebase database
     const issueRef = ref(database, `posts/${id}`);
     update(issueRef, { pending: false })
@@ -167,36 +178,63 @@ const IssuesPage = () => {
           />
           <label className="text-lg text-gray-600">Made by You</label>
         </div>
+
+        <div className="flex items-center space-x-2">
+          <label className="text-lg text-gray-600">Filter by Category:</label>
+          <select
+            className="p-2 border rounded-md"
+            value={filter.category}
+            onChange={(e) => setFilter({ ...filter, category: e.target.value })}
+          >
+            <option value="all">All</option>
+            <option value="Garbage">Garbage</option>
+            <option value="Telephone Poles">Telephone Poles</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Road">Road</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
       </div>
 
       {!load && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
-          {filteredIssues.map((issue) => (
+          {filteredIssues.map((issue1) => (
             <div
-              key={issue.id}
+              key={issue1.id}
               className={`p-4 rounded-lg shadow-md bg-white ${
-                issue.tag === "Pending"
+                issue1.tag === "Pending"
                   ? "border-l-4 border-orange-500"
                   : "border-l-4 border-green-500"
               }`}
             >
               <img
-                src={issue.src}
-                alt={issue.title}
+                src={issue1.src}
+                alt={issue1.title}
                 className="w-full h-[230px] object-cover rounded-t-lg mb-4"
               />
               <h2 className="text-xl font-semibold text-gray-800 mb-[5px]">
-                {issue.title}
+                {issue1.title}
               </h2>
-              <p className="text-gray-600 mb-[20px]">{issue.description}</p>
+              <p className="text-gray-600 mb-[20px]">{issue1.description}</p>
               <div className="flex items-center mb-[5px]">
-              <p className="text-gray-600 mr-[5px]">Tag: </p>
-              <p className={`p-[6px] rounded-[20px] text-white px-[20px] ${issue.tag === "Pending" ? "bg-orange-500 ": "bg-green-500"}`}>{issue.tag}</p>
+                <p className="text-gray-600 mr-[5px]">Progress: </p>
+                <p
+                  className={`p-[6px] rounded-[20px] text-white px-[20px] ${
+                    issue1.tag === "Pending"
+                      ? "bg-orange-500 "
+                      : "bg-green-500"
+                  }`}
+                >
+                  {issue1.tag}
+                </p>
               </div>
-              <p className="text-gray-600">Created by: {issue.madeByName}</p>
-              {issue.tag === "Pending" && issue.madeBy === userId && (
+              <p className="text-gray-600">Created by: {issue1.madeByName}</p>
+              <p className="p-[6px] rounded-[20px] px-[20px] bg-[#e3e3e3] w-[100px] mt-[20px]">
+                {issue1.issue}
+              </p>
+              {issue1.tag === "Pending" && issue1.madeBy === userId && (
                 <button
-                  onClick={() => markAsCompleted(issue.id)}
+                  onClick={() => markAsCompleted(issue1.id)}
                   className="mt-4 px-6 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition"
                 >
                   Mark as Completed
