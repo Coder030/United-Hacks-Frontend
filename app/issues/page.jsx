@@ -207,7 +207,7 @@ useEffect(() => {
           >
             <option value="all">All</option>
             <option value="Garbage">Garbage</option>
-            <option value="Telephone Poles">Telephone Poles</option>
+            <option value="Telephone Poles">Telephone Wires</option>
             <option value="Electricity">Electricity</option>
             <option value="Road">Road</option>
             <option value="Others">Others</option>
