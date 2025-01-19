@@ -52,7 +52,8 @@ useEffect(() => {
         madeByName: rawData[key].userName,
         title: rawData[key].title,
         issue: rawData[key].issue, 
-        time: rawData[key].milliseconds
+        time: rawData[key].milliseconds,
+        dist: rawData[key].district
       }));
       transformedData.sort((a, b) => b.time - a.time);
       setData(transformedData);
@@ -107,7 +108,6 @@ useEffect(() => {
 
         const matchesCategory =
           filter.category === "all" || issue.issue === filter.category;
-
         return isWithinRadius && matchesTag && matchesMadeByYou && matchesCategory;
       });
 
@@ -118,23 +118,62 @@ useEffect(() => {
   }, [filter, data, userLocation, userId]);
 
   const markAsCompleted = (id) => {
+    // Find the issue with the given ID
+    const completedIssue = filteredIssues.find((issue) => issue.id === id);
+  
+    if (!completedIssue) {
+      console.error("Issue not found.");
+      return;
+    }
+  
     // Update the issue locally
     setFilteredIssues((prev) =>
       prev.map((issue) =>
         issue.id === id ? { ...issue, pending: false } : issue
       )
     );
-
+  
     // Update the issue in the Firebase database
     const issueRef = ref(database, `posts/${id}`);
     update(issueRef, { tag: "Completed" })
       .then(() => {
         console.log(`Issue with id ${id} marked as completed in Firebase.`);
+  
+        // Update the score for the district
+        const districtRef = ref(database, `Main/Districts/${completedIssue.dist}`);
+        onValue(
+          districtRef,
+          (snapshot) => {
+            const districtData = snapshot.val();
+            if (districtData && typeof districtData.score === "number") {
+              const currentScore = districtData.score;
+              update(districtRef, { score: currentScore + 10 })
+                .then(() => {
+                  console.log(
+                    `Score updated for district "${completedIssue.dist}". New score: ${
+                      currentScore + 10
+                    }`
+                  );
+                })
+                .catch((error) => {
+                  console.error("Error updating district score in Firebase:", error);
+                });
+            } else {
+              console.error(
+                `District "${completedIssue.dist}" not found or score is not valid.`
+              );
+            }
+          },
+          { onlyOnce: true } // Fetch the current score only once
+        );
       })
       .catch((error) => {
         console.error("Error updating issue in Firebase:", error);
       });
   };
+  
+  
+  
 
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -207,7 +246,7 @@ useEffect(() => {
           >
             <option value="all">All</option>
             <option value="Garbage">Garbage</option>
-            <option value="Telephone Poles">Telephone Wires</option>
+            <option value="Telephone Wires">Telephone Wires</option>
             <option value="Electricity">Electricity</option>
             <option value="Road">Road</option>
             <option value="Others">Others</option>
@@ -251,7 +290,7 @@ useEffect(() => {
               <p className="text-gray-600 mt-0">
                 Created {timeAgo(issue1.time)}
               </p>
-              <p className="p-[6px] rounded-[20px] px-[20px] bg-[#e3e3e3] w-[100px] mt-[20px]">
+              <p className="p-[6px] rounded-[20px] px-[20px] bg-[#e3e3e3] w-fit mt-[20px]">
                 {issue1.issue}
               </p>
               {issue1.tag === "Pending" && issue1.madeBy === userId && (

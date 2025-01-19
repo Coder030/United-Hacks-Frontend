@@ -19,6 +19,9 @@ export default {
       boxShadow: {
         custom: '0px 3px 80px rgba(0, 0, 0, 0.5)',
       },
+      textDecorationStyle: {
+        wavy: 'wavy',
+      },
     },
   },
   plugins: [],
