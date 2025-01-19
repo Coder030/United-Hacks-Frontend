@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { getAuth } from "firebase/auth";
 import React, { useState, useEffect } from "react";
@@ -35,28 +35,32 @@ const IssuesPage = () => {
   }, [userId]);
 
   // Fetch issues data from Firebase
-  useEffect(() => {
-    const d = ref(database, "posts");
-    onValue(d, (snapshot) => {
-      const rawData = snapshot.val();
-      if (rawData) {
-        const transformedData = Object.keys(rawData).map((key) => ({
-          id: key,
-          description: rawData[key].description,
-          src: rawData[key].imgUrl,
-          lat: rawData[key].lat,
-          long: rawData[key].lon,
-          tag: rawData[key].pending ? "Pending" : "Completed",
-          madeBy: rawData[key].userUID,
-          madeByName: rawData[key].userName,
-          title: rawData[key].title,
-          issue: rawData[key].issue, // The category of the issue
-        }));
-        setData(transformedData);
-      }
-      setLoad(false);
-    });
-  }, []);
+  // Fetch issues data from Firebase
+useEffect(() => {
+  const d = ref(database, "posts");
+  onValue(d, (snapshot) => {
+    const rawData = snapshot.val();
+    if (rawData) {
+      const transformedData = Object.keys(rawData).map((key) => ({
+        id: key,
+        description: rawData[key].description,
+        src: rawData[key].imgUrl,
+        lat: rawData[key].lat,
+        long: rawData[key].lon,
+        tag: rawData[key].tag,
+        madeBy: rawData[key].userUID,
+        madeByName: rawData[key].userName,
+        title: rawData[key].title,
+        issue: rawData[key].issue, 
+        time: rawData[key].milliseconds
+      }));
+      transformedData.sort((a, b) => b.time - a.time);
+      setData(transformedData);
+    }
+    setLoad(false);
+  });
+}, []);
+
 
   // Fetch user location
   useEffect(() => {
@@ -123,7 +127,7 @@ const IssuesPage = () => {
 
     // Update the issue in the Firebase database
     const issueRef = ref(database, `posts/${id}`);
-    update(issueRef, { pending: false })
+    update(issueRef, { tag: "Completed" })
       .then(() => {
         console.log(`Issue with id ${id} marked as completed in Firebase.`);
       })
@@ -145,6 +149,21 @@ const IssuesPage = () => {
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
+  };
+
+  const timeAgo = (milliseconds) => {
+    const now = Date.now();
+    const timeDiff = now - milliseconds;
+
+    const seconds = Math.floor(timeDiff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    return `${seconds} second${seconds > 1 ? "s" : ""} ago`;
   };
 
   return (
@@ -229,6 +248,9 @@ const IssuesPage = () => {
                 </p>
               </div>
               <p className="text-gray-600">Created by: {issue1.madeByName}</p>
+              <p className="text-gray-600 mt-0">
+                Created {timeAgo(issue1.time)}
+              </p>
               <p className="p-[6px] rounded-[20px] px-[20px] bg-[#e3e3e3] w-[100px] mt-[20px]">
                 {issue1.issue}
               </p>
