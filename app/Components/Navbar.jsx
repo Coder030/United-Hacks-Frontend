@@ -48,9 +48,6 @@ export default function Navbar() {
         setFlag(false);
         setCurrentName("");
         setCurrentId("");
-        if (pathname !== "/login" && pathname !== "/signup") {
-          router.push("/login"); // Redirect to login if not already there
-        }
       }
     });
 

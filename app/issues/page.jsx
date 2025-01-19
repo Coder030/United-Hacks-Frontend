@@ -6,13 +6,15 @@ import { app } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { database, ref, onValue, update } from "../firebase";
 import { Messaging } from "react-cssfx-loading";
+import { usePathname, useRouter } from "next/navigation";
 
 const IssuesPage = () => {
   const auth = getAuth(app);
   const [userId, setId] = useState("");
   const [data, setData] = useState([]);
   const [load, setLoad] = useState(true);
-
+  const pathname = usePathname()
+  const router = useRouter()
   const [userLocation, setUserLocation] = useState({ lat: null, long: null });
   const [filter, setFilter] = useState({
     tag: "all",
