@@ -65,7 +65,7 @@ export default function Navbar() {
   const links = [
     { target: "/", label: "Home", active: pathname === "/" },
     { target: "/leaderboard", label: "Leaderboard", active: pathname === "/leaderboard" },
-    { target: "/page3", label: "Page 3", active: pathname === "/page3" },
+    { target: "/issues", label: "Issues", active: pathname === "/issues" },
     { target: "/page4", label: "Page 4", active: pathname === "/page4" },
   ];
 
