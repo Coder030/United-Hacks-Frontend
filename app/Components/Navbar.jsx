@@ -63,7 +63,6 @@ export default function Navbar() {
     { target: "/", label: "Home", active: pathname === "/" },
     { target: "/leaderboard", label: "Leaderboard", active: pathname === "/leaderboard" },
     { target: "/issues", label: "Issues", active: pathname === "/issues" },
-    { target: "/page4", label: "Page 4", active: pathname === "/page4" },
   ];
 
   const toggleMenu = () => {

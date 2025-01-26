@@ -67,7 +67,7 @@ export default function Home() {
         </div>
       </div>
     </div>
-    <div className="bg-gray-50 py-16">
+    <div className="py-16">
   {/* Objective Section */}
   <div className="flex items-center flex-col w-full">
     <p className="text-4xl font-bold text-gray-800 mb-6">Objective</p>
